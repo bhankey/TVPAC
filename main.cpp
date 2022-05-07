@@ -1,45 +1,31 @@
 #include <iostream>
 #include <exception>
-#include "Allocator.cpp"
+#include "containers/List.hpp"
+#include "containers/Queue.hpp"
+#include "containers/Stack.hpp"
+#include "containers/Deque.hpp"
 
 int main() {
-  auto alloc = Allocator();
+//  ft::List<int> l = ft::List<int>();
+//
+//  for (int i = 1; i < 1000; ++i) {
+//    l.push_back(i);
+//  }
+//
+//
+//  std::cout << l.back() << " " << l.front();
 
-  alloc.PrintAllSegments();
+  ft::Deque<int> q = ft::Deque<int>();
+  q.push_back(5);
 
-  auto b1 = alloc.Allocate(20);
-  auto b2 = alloc.Allocate(30);
-  auto b3 = alloc.Allocate(40);
-  auto b4 = alloc.Allocate(50);
+  std::cout << q.back();
 
-  alloc.PrintAllSegments();
+  q.push_front(10);
 
-  std::cout << std::endl;
+  std::cout << q.front();
 
-  alloc.Free(b2);
-  alloc.Free(b4);
-
-  alloc.PrintAllSegments();
-  std::cout << std::endl;
-
-  alloc.Free(b3);
-
-  alloc.PrintAllSegments();
-  std::cout << std::endl;
-
-  try {
-    alloc.Allocate(1025);
-  } catch (std::exception& e) {
-    std::cout << e.what();
-  }
-
-  std::cout << std::endl;
-
-  alloc.Allocate(500);
-  alloc.Allocate(500);
-  alloc.Allocate(500);
-  alloc.PrintAllSegments();
-  std::cout << std::endl;
+  q.pop_back();
+  std::cout <<  q.front();
 
 
   return 0;

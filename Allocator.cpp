@@ -8,28 +8,112 @@ struct InternalMemoryAddress {
   size_t offsetFromStart;
 };
 
-class MemoryBlock {
+class InternalMemoryBlock {
  public:
   InternalMemoryAddress address{};
   unsigned int size{};
   bool isFree{};
+  void *realAddress{};
 
-  MemoryBlock(size_t segmentNum, size_t offsetFromStart,
-              size_t _size, bool _isFree) {
+  InternalMemoryBlock(size_t segmentNum, size_t offsetFromStart,
+                      size_t _size, bool _isFree, void *_realAddress) {
     address = InternalMemoryAddress{};
     address.segmentNumber = segmentNum;
     address.offsetFromStart = offsetFromStart;
 
     size = _size;
     isFree = _isFree;
+    realAddress = _realAddress;
   }
 
 };
 
+template<typename T>
+class ClientMemoryBlock {
+ public:
+  InternalMemoryAddress address{};
+  unsigned int size{};
+  bool isFree{};
+
+  ClientMemoryBlock(size_t segmentNum, size_t offsetFromStart,
+                      size_t _size, bool _isFree, void *_realAddress, InternalMemoryBlock *_internal) {
+    address = InternalMemoryAddress{};
+    address.segmentNumber = segmentNum;
+    address.offsetFromStart = offsetFromStart;
+
+    size = _size;
+    isFree = _isFree;
+    realAddress = (T *)_realAddress;
+    internal = _internal;
+  }
+
+  ClientMemoryBlock() = default;
+
+  ClientMemoryBlock(ClientMemoryBlock<T> const &other) {
+    address = other.address;
+
+    size = other.size;
+    isFree = other.isFree;
+    realAddress = other.realAddress;
+    internal = other.internal;
+  }
+  
+  void Free() {
+    isFree = true;
+    internal->isFree = true;
+  }
+
+  T *GetObject() {
+    return realAddress;
+  }
+
+  const T *GetObject() const {
+    return realAddress;
+  }
+
+  void PutObject() {
+    *realAddress = T();
+  }
+
+  bool operator==(const ClientMemoryBlock<T>& rhs)
+  {
+    if (this->realAddress == rhs.realAddress) {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool operator!=(const ClientMemoryBlock<T>& rhs)
+  {
+    if (this->realAddress != rhs.realAddress) {
+      return true;
+    }
+
+    return false;
+  }
+
+  ClientMemoryBlock<T> operator=(ClientMemoryBlock<T> other)
+  {
+    address = other.address;
+    size = other.size;
+    isFree = other.isFree;
+    realAddress = other.realAddress;
+    internal = other.internal;
+
+    return *this;
+  }
+ private:
+  T *realAddress;
+  InternalMemoryBlock *internal;
+  
+};
+
+
 class Segment {
  public:
   std::byte *memory;
-  std::vector<MemoryBlock *> blocks;
+  std::vector<InternalMemoryBlock *> blocks;
   bool isFree;
   size_t maxFreeBlockSize;
   size_t maxFreeBlockAddress;
@@ -47,11 +131,11 @@ class Segment {
     maxFreeBlockAddress = 0;
     isFree = true;
 
-    auto firstBlock = new MemoryBlock(segmentNum, 0, size, true);
+    auto firstBlock = new InternalMemoryBlock(segmentNum, 0, size, true, memory);
     blocks.push_back(firstBlock);
   }
 
-  MemoryBlock *FindAndAllocate(size_t size) {
+  InternalMemoryBlock *FindAndAllocate(size_t size) {
     for (int i = 0; i < blocks.size(); ++i) {
       if (!blocks[i]->isFree) {
         continue;
@@ -72,8 +156,7 @@ class Segment {
       if (blocks[i]->address.offsetFromStart == offsetFromStart) {
         blocks[i]->isFree = true;
         auto freeMemoryStartIndex = i;
-        while((freeMemoryStartIndex > 0 && blocks[freeMemoryStartIndex - 1]->isFree)
-            || (freeMemoryStartIndex == 0 && blocks[freeMemoryStartIndex]->isFree)) {
+        while((freeMemoryStartIndex > 0 && blocks[freeMemoryStartIndex - 1]->isFree)) {
           --freeMemoryStartIndex;
         }
 
@@ -120,7 +203,8 @@ class Segment {
       auto nextBlockStart = blocks[index]->address.offsetFromStart + blocks[index]->size;
       auto nextBlockSize = allocatedMemory - nextBlockStart;
 
-      auto memBlock = new MemoryBlock(segmentNumber, nextBlockStart, nextBlockSize, true);
+      auto memBlock = new InternalMemoryBlock(segmentNumber, nextBlockStart, nextBlockSize,
+                                              true, memory + nextBlockStart);
 
       blocks.push_back(memBlock);
     }
@@ -142,7 +226,8 @@ class Allocator {
     }
   }
 
-  MemoryBlock Allocate(size_t size) {
+  template<typename T>
+  ClientMemoryBlock<T> Allocate(size_t size) {
     if (size > maxSegmentSize) {
       throw std::invalid_argument("try allocate more than allowed once time");
     }
@@ -153,7 +238,10 @@ class Allocator {
         continue;
       }
 
-      return *memory;
+      ClientMemoryBlock<T> clientBlock = ClientMemoryBlock<T> (
+          memory->address.segmentNumber, memory->address.offsetFromStart, memory->size, memory->isFree, memory->realAddress, memory);
+
+      return clientBlock;
     }
 
     auto newSegment = Segment(maxSegmentSize, segments.size());
@@ -164,16 +252,19 @@ class Allocator {
 
     segments.push_back(newSegment);
 
-    return *memory;
+    ClientMemoryBlock<T> clientBlock = ClientMemoryBlock<T> (
+        memory->address.segmentNumber, memory->address.offsetFromStart, memory->size, memory->isFree, memory->realAddress, memory);
+
+    return clientBlock;
   }
 
-  void Free(MemoryBlock memory_block) {
+  template<typename T>
+  void Free(ClientMemoryBlock<T> &memory_block) {
     if (memory_block.address.segmentNumber > segments.size()) {
       throw std::out_of_range("can't free this memory");
     }
 
     segments[memory_block.address.segmentNumber].Free(memory_block.address.offsetFromStart);
+    memory_block.Free();
   }
-
-
 };
