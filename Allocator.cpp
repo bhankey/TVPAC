@@ -71,8 +71,8 @@ class ClientMemoryBlock {
     return realAddress;
   }
 
-  void PutObject() {
-    *realAddress = T();
+  void PutObjectInArray(int index) {
+    new(realAddress + index) T();
   }
 
   bool operator==(const ClientMemoryBlock<T>& rhs)
