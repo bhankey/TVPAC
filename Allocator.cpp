@@ -215,7 +215,7 @@ class Allocator {
  private:
   std::vector<Segment> segments{};
 
-  const unsigned int maxSegmentSize = 1024;
+  const unsigned int maxSegmentSize = 2048;
 
  public:
   void PrintAllSegments() {
