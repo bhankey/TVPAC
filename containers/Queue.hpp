@@ -1,47 +1,45 @@
 //
-// Created by sergey on 28.04.2021.
+// Created by Viktoria on 14.05.2022.
 //
 
-#ifndef FT_CONTAINERS_CONTAINERS_QUEUE_HPP_
-#define FT_CONTAINERS_CONTAINERS_QUEUE_HPP_
-
-namespace ft {
+#ifndef TVPIS_QUEUE_HPP
+#define TVPIS_QUEUE_HPP
 
 #include "List.hpp"
 
-template<typename T, typename Container = ft::List<T> >
+template<typename T, typename Container = List<T> >
 class Queue {
  protected:
-  Container container_;
+    Container container_;
  public:
 
-  explicit Queue(const Container &cont = Container()) : container_(cont) {
-  }
-  Queue(const Queue &other) : container_(other.container_) {
-  }
-  Queue &operator=(const Queue &other) {
-    if (this != &other) {
-      container_ = other.container_;
+    explicit Queue(const Container &cont = Container()) : container_(cont) {
     }
-    return *this;
-  }
-  ~Queue() {
-  }
+    Queue(const Queue &other) : container_(other.container_) {
+    }
+    Queue &operator=(const Queue &other) {
+        if (this != &other) {
+            container_ = other.container_;
+        }
+        return *this;
+    }
 
-  T front() {
-    return container_.front();
-  }
+    ~Queue() = default;
 
-  bool empty() const {
-    return container_.empty();
-  }
+    T front() {
+        return container_.front();
+    }
 
-  void push(const T &value) {
-    container_.push_back(value);
-  }
-  void pop() {
-    container_.pop_front();
-  }
-};
-}
-#endif //FT_CONTAINERS_CONTAINERS_QUEUE_HPP_
+    [[nodiscard]] bool empty() const {
+        return container_.empty();
+    }
+
+    void push(const T &value) {
+            container_.push_back(value);
+        }
+        void pop() {
+            container_.pop_front();
+        }
+    };
+
+#endif //TVPIS_QUEUE_HPP

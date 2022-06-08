@@ -1,10 +1,10 @@
 //
-// Created by Sergey Shakotko on 07.05.2022.
+// Created by Viktoria on 14.05.2022.
 //
 
-#ifndef MEMALLOC__INCLUDE_HPP_
-#define MEMALLOC__INCLUDE_HPP_
+#ifndef TVPIS_INCLUDE_HPP
+#define TVPIS_INCLUDE_HPP
 
-#include "Allocator.cpp"
+#include "Allocator/Allocator.hpp"
 
-#endif //MEMALLOC__INCLUDE_HPP_
+#endif //TVPIS_INCLUDE_HPP

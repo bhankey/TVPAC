@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
-project(memalloc)
+project(TVPiS)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 17)
 
-add_executable(memalloc main.cpp Allocator.cpp include.hpp containers/List.hpp containers/ListNode.hpp containers/Queue.hpp containers/Stack.hpp containers/Deque.hpp)
+add_executable(TVPiS main.cpp include.hpp Containers/List.hpp Containers/ListNode.hpp Containers/Deque.hpp Containers/Queue.hpp Containers/Stack.hpp Containers/HashTable.hpp Lexer.hpp poliz.hpp Translator.hpp RecursiveParser.hpp Reader.hpp Allocator/ClientMemoryBlock.hpp Allocator/InternalMemory.hpp Allocator/InternalMemory.cpp Allocator/Segment.cpp Allocator/Segment.hpp Allocator/Allocator.hpp VariableBlock.hpp VariableSaver.hpp)

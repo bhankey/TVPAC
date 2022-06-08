@@ -4,12 +4,10 @@
 
 #ifndef TVPIS_HASHTABLE_HPP
 #define TVPIS_HASHTABLE_HPP
-
+using namespace std;
 #include "List.hpp"
-#include "Utils.hpp"
 #include "../include.hpp"
 
-namespace ft {
 template<typename T>
 struct HashTableElement {
     std::string key;
@@ -21,7 +19,8 @@ class HashTable {
  private:
     static const int default_size = 8;
 
-    ClientMemoryBlock<List<HashTableElement<T> > > _Array_list;
+    ClientMemoryBlock<List<HashTableElement<T> > >
+        _Array_list;
 
     int size;
     int buffer_size;
@@ -29,7 +28,7 @@ class HashTable {
 
     ::Allocator allocator_;
  public:
-    HashTable() : allocator_(Allocator()) {
+    explicit HashTable(Allocator allocator_ = Allocator()) : allocator_(allocator_) {
         _Array_list = allocator_.Allocate<List<HashTableElement<T>>>(
             sizeof(List<HashTableElement<T>>) * default_size);
 
@@ -41,20 +40,25 @@ class HashTable {
 
     }
 
-    int hash_function(std::string s) // Хеш-функция
+    int hash_function(const std::string &s) const// Хеш-функция
     {
         const int p = 31;
         long long hash = 0, p_pow = 1;
 
-        for (char i : s) {
+        for (char i: s) {
             hash += int(i - '0') * p_pow;
             p_pow *= p;
         }
 
         return abs(hash % buffer_size);
     }
+
+    int get_size() {
+        return this->size;
+    }
+
     //Вставка элемента в хеш-таблицу
-    void insert(std::string _key, T _value) {
+    void insert(const std::string &_key, T _value) {
         size++;
         if (float(size) / float(buffer_size) >= rehash_size) {
             this->resize();
@@ -67,7 +71,7 @@ class HashTable {
     }
 
     //Поиск элемента по ключу
-    T find(std::string _key) {
+    T find(const std::string &_key) const {
         int index = hash_function(_key);
 
         if (!_Array_list.GetObject()[index].empty()) {
@@ -79,8 +83,9 @@ class HashTable {
             }
 
         }
-
-        return _Array_list.GetObject()[index].front().value;
+        T empt;
+        return empt;
+//              return _Array_list.GetObject()[index].front().value;
     }
 
     // Удаление элемента по ключу
@@ -95,20 +100,12 @@ class HashTable {
 
         int i = 0;
         for (auto iter = 0; iter != _Array_list.GetObject()[index].size(); iter++) {
-            if (_key == (*_Array_list[iter].key)) {
-                isFind = true;
-                number = i;
+            if (_key == (_Array_list.GetObject()[index][iter].key)) {
 
+                _Array_list.GetObject()[index].erase(iter);
                 break;
             }
             i++;
-        }
-
-        if (isFind) {
-            auto iter = _Array_list.GetObject()[index].begin();
-
-            advance(iter, number);
-            _Array_list.GetObject()[index].erase(iter);
         }
     }
 
@@ -117,8 +114,12 @@ class HashTable {
         for (int i = 0; i < buffer_size; i++) {
             std::cout << i << " ";
             if (!_Array_list.GetObject()[i].empty()) {
-                std::cout << _Array_list.GetObject()[i].front().key << " "
-                          << _Array_list.GetObject()[i].front().value;
+                auto list = _Array_list.GetObject()[i];
+                for (auto iter = 0; iter != list.size(); iter++) {
+                    std::cout << list[iter].key << " " <<
+                              list[iter].value << " ";
+
+                }
             }
             std::cout << "\n";
         }
@@ -130,20 +131,31 @@ class HashTable {
         buffer_size *= 2;
         size = 0;
 
-        auto newArrayList = allocator_.template Allocate<List<HashTableElement<T>>>(
-            sizeof(List<HashTableElement<T>>) * buffer_size);
-
+        auto pastArrayList = allocator_.template Allocate<List<HashTableElement<T>>>
+            (
+                sizeof(List<HashTableElement<T>>) * buffer_size);
         for (int i = 0; i < buffer_size; i++) {
-            newArrayList.PutObjectInArray(i);
+            pastArrayList.PutObjectInArray(i);
         }
-
+        auto t = _Array_list;
+        _Array_list = pastArrayList;
+        pastArrayList = t;
         for (int i = 0; i < past_buffer_size; i++) {
-            newArrayList.GetObject()[i] = _Array_list.GetObject()[i];
+            if (!pastArrayList.GetObject()[i].empty()) {
+                auto list = pastArrayList.GetObject()[i];
+                for (auto iter = 0; iter != list.size(); iter++) {
+                    this->insert(list[iter].key, list[iter].value);
+                }
+            }
         }
-
-        _Array_list = newArrayList;
+//
+//            for (int i = 0; i < past_buffer_size; i++) {
+//                newArrayList.GetObject()[i] = _Array_list.GetObject()[i];
+//            }
+//
+//            _Array_list = newArrayList;
     }
 
 };
-}
+
 #endif //TVPIS_HASHTABLE_HPP

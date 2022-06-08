@@ -1,62 +1,57 @@
 //
-// Created by sergey on 28.04.2021.
+// Created by Viktoria on 14.05.2022.
 //
 
-#ifndef FT_CONTAINERS_CONTAINERS_DEQUE_HPP_
-#define FT_CONTAINERS_CONTAINERS_DEQUE_HPP_
+#ifndef TVPIS_DEQUE_HPP
+#define TVPIS_DEQUE_HPP
 
 #include "List.hpp"
 
-namespace ft {
-template<typename T, typename Container = ft::List<T> >
+template<typename T, typename Container = List<T> >
 class Deque {
  protected:
-  Container container_;
+    Container container_;
  public:
-
-  explicit Deque(const Container &cont = Container()) : container_(cont) {
-  }
-  Deque(const Deque &other) : container_(other.container_) {
-  }
-  Deque &operator=(const Deque &other) {
-    if (this != &other) {
-      container_ = other.container_;
+    explicit Deque(const Container &cont = Container()) : container_(cont) {
     }
-    return *this;
-  }
-  ~Deque() {
-  }
+    Deque(const Deque &other) : container_(other.container_) {
+    }
+    Deque &operator=(const Deque &other) {
+        if (this != &other) {
+            container_ = other.container_;
+        }
+        return *this;
+    }
 
-  T front() {
-    return container_.front();
-  }
+    ~Deque() = default;
 
-  bool empty() const {
-    return container_.empty();
-  }
+    T front() {
+        return container_.front();
+    }
 
-  void push_back(const T &value) {
-    container_.push_back(value);
-  }
+    [[nodiscard]] bool empty() const {
+        return container_.empty();
+    }
 
-  void push_front(const T &value) {
-    container_.push_front(value);
-  }
+    void push_back(const T &value) {
+            container_.push_back(value);
+        }
 
-  void pop_back() {
-    container_.pop_back();
-  }
+        void push_front(const T &value) {
+            container_.push_front(value);
+        }
 
-  void pop_front() {
-    container_.pop_front();
-  }
+        void pop_back() {
+            container_.pop_back();
+        }
 
-  T back() {
-    return container_.back();
-  }
+        void pop_front() {
+            container_.pop_front();
+        }
 
-
+        T back() {
+            return container_.back();
+        }
 };
-}
 
-#endif //FT_CONTAINERS_CONTAINERS_DEQUE_HPP_
+#endif //TVPIS_DEQUE_HPP

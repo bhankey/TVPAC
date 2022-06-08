@@ -1,21 +1,15 @@
 //
-// Created by sergey on 20.04.2021.
+// Created by Viktoria on 14.05.2022.
 //
 
-#ifndef FT_CONTAINERS_CONTAINERS_LISTNODE_HPP_
-#define FT_CONTAINERS_CONTAINERS_LISTNODE_HPP_
-
+#ifndef TVPIS_LISTNODE_HPP
+#define TVPIS_LISTNODE_HPP
 #include "../include.hpp"
-
-namespace ft {
 
 template<typename T>
 struct List_node {
-  ClientMemoryBlock<List_node> prev;
-  ClientMemoryBlock<List_node> next;
-  T data;
+    ClientMemoryBlock<List_node> prev;
+    ClientMemoryBlock<List_node> next;
+    T data;
 };
-
-}
-
-#endif //FT_CONTAINERS_CONTAINERS_LISTNODE_HPP_
+#endif //TVPIS_LISTNODE_HPP
